@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="noindex,nofollow" name="robots"/><title>管理者編集｜株式会社道東空調</title><style>
+*{box-sizing:border-box}body{margin:0;background:#eef5f9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;color:#17384f}
+header{background:#082b55;color:#fff;padding:18px 4%;display:flex;justify-content:space-between;align-items:center}header h1{margin:0;font-size:19px}header a{color:#fff}
+main{max-width:1180px;margin:28px auto;padding:0 3%}.login,.panel{background:#fff;border:1px solid #dce7ef;border-radius:15px;box-shadow:0 10px 30px #1232}.login{max-width:520px;margin:70px auto;padding:26px}.panel{padding:20px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.tabs button{border:0;border-radius:8px;padding:10px 13px;background:#eaf4fa;color:#0b6298;font-weight:850;cursor:pointer}.tabs button.active{background:#082b55;color:#fff}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.toolbar h2{margin:0}.status{font-size:12px;color:#0b6298;font-weight:800}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.field label{font-size:12px;font-weight:850;color:#536b7d}.field input,.field textarea{padding:11px;border:1px solid #cadce7;border-radius:8px;width:100%}.field textarea{min-height:105px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.full{grid-column:1/-1}.btn{border:0;border-radius:8px;padding:10px 14px;font-weight:850;cursor:pointer}.primary{background:#0877bd;color:#fff}.soft{background:#eaf4fa;color:#0b6298}.danger{background:#fff0f0;color:#aa3434}
+.row{display:grid;grid-template-columns:120px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #e9eff3}.actions{display:flex;gap:7px}.meta{font-size:12px;color:#687f90;margin-top:4px}
+.overlay{display:none;position:fixed;inset:0;background:#03182db8;z-index:100;padding:4vh 4%;overflow:auto}.overlay.open{display:flex;align-items:center;justify-content:center}.dialog{width:min(820px,97vw);max-height:91vh;overflow:auto;background:#fff;border-radius:15px;padding:23px}
+.rich-toolbar{display:flex;flex-wrap:wrap;gap:7px;padding:9px;background:#eaf4fa;border:1px solid #cadce7;border-radius:8px 8px 0 0}.rich-toolbar button,.rich-toolbar select{padding:7px;border:1px solid #bad1df;border-radius:6px;background:white;cursor:pointer}.rich-editor{min-height:270px;padding:15px;border:1px solid #cadce7;border-top:0;border-radius:0 0 8px 8px;background:white;line-height:1.9;outline-offset:2px;overflow-wrap:anywhere}.rich-editor img{display:block;max-width:100%;height:auto;margin:12px 0;border-radius:7px;cursor:pointer}.rich-editor img.selected-image{outline:3px solid #0877bd}.asset-preview{height:145px;border:1px dashed #a7c9dd;border-radius:10px;background:#f5fafc;background-size:cover;background-position:center;margin:7px 0}.note{font-size:11px;color:#718798;line-height:1.7}.hidden{display:none!important}.savebar{position:sticky;bottom:0;background:#fff;padding:14px 0 0;border-top:1px solid #e5edf3;margin-top:18px}
+@media(max-width:780px){.two,.three{grid-template-columns:1fr}.full{grid-column:auto}.row{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>株式会社道東空調｜管理者編集</h1><div style="display:flex;gap:10px;align-items:center"><a href="index.html" target="_blank">公開HPを見る ↗</a><button id="logoutBtn" class="btn soft" style="margin:0">ログアウト</button></div></header>
+<main>
+<section class="login" id="login"><h2>管理者ログイン</h2><div class="field"><label>パスワード</label><input id="pw" type="password"/></div><button class="btn primary" id="loginBtn">ログイン</button><div class="meta" id="loginMsg"></div></section>
+<section class="panel hidden" id="app"><div id="cmsScopeNote" style="margin:0 0 16px;padding:12px 14px;background:#f0f8fd;border:1px solid #cfe7f5;border-radius:10px;font-size:12px;line-height:1.8;color:#45677d">トップページ・事業内容画像・お知らせ・実績紹介・採用情報・お問い合わせを編集できます。「保存・公開」で一般公開HPへ反映されます。</div><div class="tabs"><button class="active" data-tab="site">トップページ</button><button data-tab="news">お知らせ</button><button data-tab="works">実績紹介</button><button data-tab="recruit">採用情報</button><button data-tab="profile">会社概要</button><button data-tab="certificates">各種許可書・認定書一覧</button><button data-tab="contact">お問い合わせ設定<br><small style="font-weight:400;color:#5b6b7b">株式会社道東空調へのお問い合わせは、株式会社三協設備のお問い合わせフォームへリンクします。</small></button></div>
+<div class="toolbar"><div><h2 id="heading">トップページ</h2><div class="status">「保存・公開」で一般公開HPへ自動反映</div></div><button class="btn primary hidden" id="addBtn">＋ 追加</button></div><div id="content"></div></section>
+</main>
+<div class="overlay" id="edit"><div class="dialog"><h2 id="editTitle">編集</h2><div id="editForm"></div><div class="savebar"><button class="btn primary" id="saveItemBtn">保存・公開</button> <button class="btn soft" id="cancelBtn">キャンセル</button></div></div></div>
+<script>
+let password='',tab='site',data=null,editing=null;
+const $=id=>document.getElementById(id), api=(q='')=>'/api/cms'+q, asset=k=>api('?asset='+encodeURIComponent(k));
+async function call(url,opt={}){opt.headers=Object.assign({},opt.headers||{},{'X-Admin-Password':password});const r=await fetch(url,opt);if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||'error');return r.json().catch(()=>null)}
+async function login(){
+password=$('pw').value;
+$('loginMsg').textContent='確認中...';
+try{
+  const r=await fetch('/api/auth',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({password})
+  });
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.ok){
+    $('loginMsg').textContent=j.error==='wrong_password'?'パスワードが一致しません。':'管理者認証を確認してください。';
+    return;
+  }
+  $('loginMsg').textContent='';
+  sessionStorage.setItem('dotokucho_admin_logged_in','1');
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  await load();
+}catch(e){
+  $('loginMsg').textContent='管理者認証に接続できません。';
+}}
+async function getType(t){const r=await fetch(api('?type='+t),{cache:'no-store',headers:{'x-admin-password':password}});return r.json()} async function saveType(t,v){return call(api('?type='+t),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)})}
+async function uploadAsset(key,file){const fd=new FormData();fd.append('file',file);fd.append('key',key);return call(api('?assetUpload=1'),{method:'POST',body:fd})} async function deleteAsset(key){return call(api('?asset='+encodeURIComponent(key)),{method:'DELETE'})}
+async function load(){data=await getType(tab);if(!data||typeof data!=='object'||['news','works','certificates'].includes(tab)&&!Array.isArray(data))throw Error('管理データの読み込みに失敗しました');render()} function render(){
+document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));$('addBtn').classList.toggle('hidden',!['news','works','certificates'].includes(tab));$('heading').textContent={site:'トップページ',news:'お知らせ',works:'実績紹介',recruit:'採用情報',certificates:'各種許可書・認定書一覧',profile:'会社概要',contact:'お問い合わせ設定'}[tab];if(tab==='site')renderSite();else if(tab==='news'||tab==='works')renderList();else if(tab==='certificates')renderCertificates();else if(tab==='profile')renderProfile();else if(tab==='recruit')renderRecruit();else renderContact()}
+function renderSite(){const s=data;$('content').innerHTML=`
+<h3>トップ画像・基本情報</h3>
+<div class="two">
+  <div class="field"><label>会社名</label><input id="companyName"></div>
+  <div class="field"><label>トップ見出し</label><input id="heroTitle"></div>
+  <div class="field full"><label>トップ紹介文</label><textarea id="heroCopy"></textarea></div>
+  <div class="field"><label>英語キャッチコピー</label><input id="sloganEn"></div>
+  <div class="field"><label>日本語キャッチコピー</label><input id="sloganJp"></div>
+  <div class="field full"><label>トップ画像</label><div id="heroPreview" class="asset-preview"></div><input id="heroFile" type="file" accept="image/*"><button id="heroRemove" class="btn danger">画像を外す</button></div>
+</div>
+
+<h3>会社概要の文章</h3>
+<div class="two">
+  <div class="field"><label>会社概要 見出し</label><input id="companyTitle"></div>
+  <div class="field full"><label>会社概要 紹介文①</label><textarea id="companyLead1"></textarea></div>
+  <div class="field full"><label>会社概要 紹介文②</label><textarea id="companyLead2"></textarea></div>
+  <div class="field"><label>所在地</label><input id="address"></div>
+  <div class="field"><label>電話番号1</label><input id="phone1"></div>
+  <div class="field"><label>電話番号2</label><input id="phone2"></div>
+  <div class="field"><label>グループ会社URL</label><input id="groupUrl"></div>
+  <div class="field full"><label>会社概要欄の事業内容</label><textarea id="businessSummary"></textarea></div>
+</div>
+
+<h3>事業内容の文章</h3>
+<div class="two">
+  <div class="field"><label>事業内容 見出し</label><input id="businessTitle"></div>
+  <div class="field full"><label>事業内容 紹介文</label><textarea id="businessIntro"></textarea></div>
+</div>
+<div id="bizCards" class="three"></div>
+
+<h3>「道東空調について」の文章</h3>
+<div class="two">
+  <div class="field full"><label>見出し</label><input id="aboutTitle"></div>
+  <div class="field full"><label>紹介文</label><textarea id="aboutText"></textarea></div>
+</div>
+
+<h3>メインページ下部の案内カード</h3>
+<div class="two">
+  <div class="field"><label>採用情報 見出し</label><input id="recruitCardTitle"></div>
+  <div class="field"><label>お知らせ 見出し</label><input id="newsCardTitle"></div>
+  <div class="field full"><label>採用情報 紹介文</label><textarea id="recruitCardText"></textarea></div>
+  <div class="field full"><label>お知らせ 紹介文</label><textarea id="newsCardText"></textarea></div>
+  <div class="field"><label>お問い合わせ 見出し</label><input id="contactCardTitle"></div>
+  <div class="field full"><label>お問い合わせ 紹介文</label><textarea id="contactCardText"></textarea></div>
+</div>
+
+<h3>ページ最下部のお問い合わせ文章</h3>
+<div class="two">
+  <div class="field full"><label>見出し</label><input id="contactTitle"></div>
+  <div class="field full"><label>紹介文</label><textarea id="contactIntro"></textarea></div>
+</div>
+
+<div class="savebar"><button id="saveSite" class="btn primary">保存・公開</button></div>`;
+
+const keys=['companyName','heroTitle','heroCopy','sloganEn','sloganJp',
+'companyTitle','companyLead1','companyLead2','address','phone1','phone2','groupUrl','businessSummary',
+'businessTitle','businessIntro','aboutTitle','aboutText',
+'recruitCardTitle','recruitCardText','newsCardTitle','newsCardText','contactCardTitle','contactCardText',
+'contactTitle','contactIntro'];
+keys.forEach(k=>{if($(k))$(k).value=s[k]||''});
+if(s.heroImageKey)$('heroPreview').style.backgroundImage='url("'+asset(s.heroImageKey)+'")';
+
+const wrap=$('bizCards');
+(s.businessCards||[]).forEach((c,i)=>{
+  const d=document.createElement('div');
+  d.innerHTML=`<div class="field"><label>事業${i+1} タイトル</label><input id="bt${i}"></div>
+  <div class="field"><label>事業${i+1} 紹介文</label><textarea id="bx${i}"></textarea></div>
+  <div class="field"><label>事業${i+1} 画像</label><div id="bp${i}" class="asset-preview"></div><input id="bf${i}" type="file" accept="image/*"><button id="br${i}" class="btn danger">画像を外す</button></div>`;
+  wrap.appendChild(d);
+  $('bt'+i).value=c.title||'';
+  $('bx'+i).value=c.text||'';
+  if(c.imageKey)$('bp'+i).style.backgroundImage='url("'+asset(c.imageKey)+'")';
+  $('br'+i).onclick=async()=>{if(c.imageKey)await deleteAsset(c.imageKey);c.imageKey='';$('bp'+i).style.backgroundImage='none'};
+});
+$('heroRemove').onclick=async()=>{if(s.heroImageKey)await deleteAsset(s.heroImageKey);s.heroImageKey='';$('heroPreview').style.backgroundImage='none'};
+$('saveSite').onclick=saveSite}
+
+async function saveSite(){
+  const s=data;
+  const keys=['companyName','heroTitle','heroCopy','sloganEn','sloganJp',
+  'companyTitle','companyLead1','companyLead2','address','phone1','phone2','groupUrl','businessSummary',
+  'businessTitle','businessIntro','aboutTitle','aboutText',
+  'recruitCardTitle','recruitCardText','newsCardTitle','newsCardText','contactCardTitle','contactCardText',
+  'contactTitle','contactIntro'];
+  keys.forEach(k=>{if($(k))s[k]=$(k).value.trim()});
+  const hf=$('heroFile').files[0];
+  if(hf){await uploadAsset('site/hero',hf);s.heroImageKey='site/hero'}
+  s.businessCards=(s.businessCards||[]).map((c,i)=>({...c,title:$('bt'+i).value.trim(),text:$('bx'+i).value.trim()}));
+  for(let i=0;i<s.businessCards.length;i++){
+    const f=$('bf'+i).files[0];
+    if(f){const key='site/business-'+i;await uploadAsset(key,f);s.businessCards[i].imageKey=key}
+  }
+  await saveType('site',s);
+  alert('メインページの文章を公開しました');
+  await load()
+}
+
+
+let richSelection=null,richSelectedImage=null,richPendingUploads=[];
+function richEscape(t){return String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function richLegacy(x){
+ let h=richEscape(x.body||'').replace(/\n/g,'<br>');
+ h=h.replace(/\[\[(大|小)\]\]([\s\S]*?)\[\[\/\1\]\]/g,(_,size,t)=>`<span style="font-size:${size==='大'?'1.4em':'0.85em'}">${t}</span>`);
+ h=h.replace(/\[\[画像(\d+)\]\]/g,(_,i)=>{const im=(x.images||[])[+i-1];return im?`<img src="${asset(im.key)}" data-asset-key="${richEscape(im.key)}" alt="記事画像">`:''});
+ return h;
+}
+function setupRichEditor(x){
+ const ed=$('richEditor');ed.innerHTML=x.bodyHtml||richLegacy(x);richPendingUploads=[];richSelection=null;richSelectedImage=null;
+ const saveSelection=()=>{const sel=window.getSelection();if(sel.rangeCount&&ed.contains(sel.anchorNode))richSelection=sel.getRangeAt(0).cloneRange()};
+ ed.addEventListener('keyup',saveSelection);ed.addEventListener('mouseup',saveSelection);
+ ed.addEventListener('click',e=>{ed.querySelectorAll('img').forEach(im=>im.classList.remove('selected-image'));richSelectedImage=e.target.closest('img');if(richSelectedImage)richSelectedImage.classList.add('selected-image');saveSelection()});
+ ed.addEventListener('paste',e=>{e.preventDefault();document.execCommand('insertText',false,e.clipboardData.getData('text/plain'))});
+ $('richImage').onclick=()=>{$('richFile').click()};
+ $('richFile').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(!/^image\/(png|jpeg|webp|gif)$/.test(f.type)||f.size>8*1024*1024){alert('PNG・JPEG・WebP・GIFの8MB以下の画像を選んでください');return}
+  const key='news/'+(x.id||'n-'+Date.now())+'/'+Date.now()+'-'+Math.random().toString(36).slice(2);
+  try{
+   await uploadAsset(key,f);
+   richPendingUploads.push(key);
+   ed.focus();
+   const sel=window.getSelection();if(richSelection&&ed.contains(richSelection.startContainer)){sel.removeAllRanges();sel.addRange(richSelection)}
+   const im=document.createElement('img');im.src=asset(key);im.dataset.assetKey=key;im.alt=f.name;im.style.width='65%';
+   const range=sel.rangeCount?sel.getRangeAt(0):null;
+   if(range&&ed.contains(range.startContainer)){range.deleteContents();range.insertNode(im);range.setStartAfter(im);range.collapse(true);sel.removeAllRanges();sel.addRange(range)}
+   else ed.append(im);
+   const br=document.createElement('br');im.after(br);richSelection=null;
+  }catch(err){alert('画像のアップロードに失敗しました：'+err.message)}
+  e.target.value='';
+ };
+ $('richSize').onchange=e=>{if(!e.target.value)return;ed.focus();if(richSelection){const sel=window.getSelection();sel.removeAllRanges();sel.addRange(richSelection)}document.execCommand('fontSize',false,e.target.value);e.target.value='';saveSelection()};
+ $('richBold').onclick=()=>{ed.focus();if(richSelection){const sel=window.getSelection();sel.removeAllRanges();sel.addRange(richSelection)}document.execCommand('bold');saveSelection()};
+ $('richRemoveImage').onclick=()=>{if(richSelectedImage){richSelectedImage.remove();richSelectedImage=null}};
+ $('richImageSize').onchange=e=>{if(richSelectedImage&&e.target.value)richSelectedImage.style.width=e.target.value;e.target.value=''};
+}
+function serializeRichEditor(){
+ const clone=$('richEditor').cloneNode(true);
+ clone.querySelectorAll('img').forEach(im=>{im.classList.remove('selected-image');const key=im.dataset.assetKey;if(!key){im.remove();return}im.removeAttribute('src');im.setAttribute('data-asset-key',key);im.removeAttribute('class');im.removeAttribute('onerror')});
+ return clone.innerHTML;
+}
+function renderList(){const arr=data||[];$('content').innerHTML=arr.length?arr.map((x,i)=>`<div class="row"><div>${tab==='news'?(x.date||''):('WORKS '+String(i+1).padStart(2,'0'))}</div><div><b>${x.title||''}</b><div class="meta">${tab==='news'?((x.category||'')+' / '+(x.status==='draft'?'下書き':x.status==='scheduled'?'予約 '+(x.publishAt||'日時未設定'):'公開中')):(x.type||'')}</div></div><div class="actions"><button class="btn soft" onclick="editItem(${i})">編集</button><button class="btn danger" onclick="deleteItem(${i})">削除</button></div></div>`).join(''):'<div class="meta">まだ登録がありません。</div>'}
+function editItem(i=null){editing=i;const x=i===null?{}:data[i];$('editTitle').textContent=i===null?'追加':'編集';if(tab==='news')$('editForm').innerHTML=`<div class="two"><div class="field"><label>日付</label><input id="fdate" type="date"></div><div class="field"><label>カテゴリー</label><input id="fcategory"></div><div class="field"><label>公開設定</label><select id="fstatus"><option value="published">すぐ公開</option><option value="scheduled">予約公開</option><option value="draft">下書き</option></select></div><div class="field"><label>予約公開日時（日本時間）</label><input id="fpublish" type="datetime-local"></div><div class="field full"><label>タイトル</label><input id="ftitle"></div><div class="field full"><label>記事本文（Wordのように編集できます）</label><div class="rich-toolbar"><button type="button" id="richImage">📷 画像を挿入</button><input type="file" id="richFile" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden"><select id="richSize" aria-label="文字サイズ"><option value="">文字サイズ</option><option value="2">小</option><option value="3">標準</option><option value="5">大</option><option value="6">特大</option></select><button type="button" id="richBold"><b>太字</b></button><button type="button" id="richRemoveImage">選択画像を削除</button><select id="richImageSize"><option value="">画像サイズ</option><option value="35%">小</option><option value="65%">中</option><option value="100%">大</option></select></div><div id="richEditor" class="rich-editor" contenteditable="true" role="textbox" aria-multiline="true"></div><div class="note">文章の好きな場所をクリックして「画像を挿入」を押します。画像をクリックすると大きさ変更・削除ができます。Enterで改行できます。</div></div><div class="field full"><label>お知らせ画像（1枚）</label><div id="newsPreview" class="asset-preview"></div><input id="newsFile" type="file" accept="image/*"><button id="newsRemove" class="btn danger">画像を外す</button><div class="note">画像は本文の下に表示されます。8MB以内の画像を選択してください。</div></div></div>`;else $('editForm').innerHTML=`<div class="two"><div class="field"><label>タイトル</label><input id="ftitle"></div><div class="field"><label>工事種別</label><input id="ftype"></div><div class="field full"><label>一覧紹介文</label><textarea id="fsummary"></textarea></div><div class="field full"><label>詳細本文</label><textarea id="fbody"></textarea></div><div class="field full"><label>実績画像</label><div id="workPreview" class="asset-preview"></div><input id="workFile" type="file" accept="image/*"><button id="workRemove" class="btn danger">画像を外す</button></div></div>`;
+if(tab==='news'){$('fdate').value=x.date||new Date().toISOString().slice(0,10);$('fcategory').value=x.category||'お知らせ';$('ftitle').value=x.title||'';setupRichEditor(x);$('fstatus').value=x.status||'published';$('fpublish').value=x.publishAt||'';if(x.imageKey)$('newsPreview').style.backgroundImage='url("'+asset(x.imageKey)+'")';$('newsRemove').onclick=async()=>{if(x.imageKey)await deleteAsset(x.imageKey);x.imageKey='';$('newsPreview').style.backgroundImage='none'}}else{$('ftitle').value=x.title||'';$('ftype').value=x.type||'';$('fsummary').value=x.summary||'';$('fbody').value=x.body||'';if(x.imageKey)$('workPreview').style.backgroundImage='url("'+asset(x.imageKey)+'")';$('workRemove').onclick=async()=>{if(x.imageKey)await deleteAsset(x.imageKey);x.imageKey='';$('workPreview').style.backgroundImage='none'}}$('edit').classList.add('open')}
+async function saveItem(){let x=editing===null?{id:(tab==='news'?'n-':'w-')+Date.now()}:data[editing];if(tab==='news'){Object.assign(x,{date:$('fdate').value,category:$('fcategory').value.trim(),title:$('ftitle').value.trim(),bodyHtml:serializeRichEditor(),body:$('richEditor').innerText,status:$('fstatus').value,publishAt:$('fpublish').value,images:[...(x.images||[])]});if(x.status==='scheduled'&&!x.publishAt){alert('予約公開日時を指定してください');return;}const f=$('newsFile').files[0];if(f){const key='news/'+x.id;await uploadAsset(key,f);x.imageKey=key}}else{Object.assign(x,{title:$('ftitle').value.trim(),type:$('ftype').value.trim(),summary:$('fsummary').value.trim(),body:$('fbody').value.trim()});const f=$('workFile').files[0];if(f){const key='works/'+x.id;await uploadAsset(key,f);x.imageKey=key}}if(!x.title)return alert('タイトルを入力してください');try{const next=[...data];if(editing===null)next.push(x);else next[editing]=x;await saveType(tab,next);data=next;$('edit').classList.remove('open');await load()}catch(e){console.error(e);alert('保存に失敗しました: '+e.message);return}alert(tab==='news'?(x.status==='draft'?'下書きを保存しました':x.status==='scheduled'?'予約設定を保存しました':'公開しました'):'公開しました')}
+async function deleteItem(i){if(!confirm('削除しますか？'))return;const x=data[i];if(x.imageKey)await deleteAsset(x.imageKey);if(tab==='news')for(const im of (x.images||[]))await deleteAsset(im.key);data.splice(i,1);await saveType(tab,data);await load()}
+
+function renderProfile(){
+ const rows=Array.isArray(data.rows)?data.rows:[];
+ $('content').innerHTML=`<p class="note">会社名・住所・電話・FAXのほか、設立年月日・代表者名・事業内容などを自由に追加できます。保存すると公開ページへ反映されます。</p><div id="profileRows"></div><button type="button" id="profileAdd" class="btn soft">＋ 項目を追加</button><div class="savebar"><button type="button" id="profileSave" class="btn primary">会社概要を保存・公開</button></div>`;
+ const area=$('profileRows');
+ function appendRow(label='',value=''){
+  const wrap=document.createElement('div');wrap.className='two';wrap.style.cssText='border-bottom:1px solid #dbe7f0;padding:12px 0;align-items:start';
+  const labelBox=document.createElement('div');labelBox.className='field';const labelEl=document.createElement('label');labelEl.textContent='項目名';const input=document.createElement('input');input.className='profileLabel';input.value=label;input.placeholder='例：設立年月日';labelBox.append(labelEl,input);
+  const valBox=document.createElement('div');valBox.className='field';const valLabel=document.createElement('label');valLabel.textContent='内容（改行できます）';const textarea=document.createElement('textarea');textarea.className='profileValue';textarea.rows=3;textarea.value=value;valBox.append(valLabel,textarea);
+  const del=document.createElement('button');del.type='button';del.className='btn danger';del.textContent='この項目を削除';del.onclick=()=>wrap.remove();wrap.append(labelBox,valBox,del);area.append(wrap);
+ }
+ rows.forEach(r=>appendRow(r.label,r.value));
+ $('profileAdd').onclick=()=>appendRow();
+ $('profileSave').onclick=async()=>{
+  const next=[...area.children].map(row=>({label:row.querySelector('.profileLabel').value.trim(),value:row.querySelector('.profileValue').value.trim()})).filter(r=>r.label||r.value);
+  if(next.some(r=>!r.label)){alert('項目名が空欄の行があります');return}
+  const btn=$('profileSave');btn.disabled=true;
+  try{await saveType('profile',{rows:next});data={rows:next};alert('会社概要を保存・公開しました')}catch(e){alert('保存できませんでした：'+e.message)}finally{btn.disabled=false}
+ };
+}
+function certText(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderCertificates(){
+ $('content').innerHTML='<p class="note">認定書・許可書の名称、説明文、画像またはPDFを登録できます。追加後は一覧ページに自動表示されます。</p>'+
+ (data.length?data.map((x,i)=>`<div class="row"><div>${x.imageKey?'<span>📄</span>':'📋'}</div><div><b>${certText(x.title)}</b><div class="meta">${certText(x.description).slice(0,120)}</div></div><div class="actions"><button class="btn soft" onclick="editCertificate(${i})">編集</button><button class="btn danger" onclick="deleteCertificate(${i})">削除</button></div></div>`).join(''):'<p class="note">まだ登録がありません。「＋ 追加」から登録してください。</p>');
+}
+function editCertificate(i=null){
+ editing=i;const x=i===null?{}:data[i];
+ $('editTitle').textContent=i===null?'認定書・許可書を追加':'認定書・許可書を編集';
+ $('editForm').innerHTML=`<div class="two"><div class="field full"><label>認定書・許可書の名称</label><input id="certTitle" placeholder="例：建設業許可書"></div><div class="field full"><label>説明文（改行できます）</label><textarea id="certDescription" rows="5"></textarea></div><div class="field full"><label>認定書・許可書の画像またはPDF</label><input type="file" id="certFile" accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"><p class="note">JPEG・PNG・WebP・GIF・PDF、8MB以内。既存のファイルを変更する場合だけ選択してください。</p><div id="certCurrent"></div></div></div>`;
+ $('certTitle').value=x.title||'';$('certDescription').value=x.description||'';
+ $('certCurrent').textContent=x.imageKey?'登録済みファイルがあります（未選択ならそのまま維持します）':'ファイルは未登録です';
+ $('edit').classList.add('open');
+}
+async function saveCertificate(){
+ const title=$('certTitle').value.trim(),description=$('certDescription').value.trim(),f=$('certFile').files[0];
+ if(!title){alert('名称を入力してください');return}
+ if(f&&(!['image/jpeg','image/png','image/webp','image/gif','application/pdf'].includes(f.type)||f.size>8*1024*1024)){alert('対応する画像またはPDF（8MB以下）を選んでください');return}
+ const x=editing===null?{id:'c-'+Date.now()}:({...data[editing]});
+ x.title=title;x.description=description;
+ try{
+  if(f){const key='certificates/'+x.id+'/'+Date.now();await uploadAsset(key,f);x.imageKey=key;x.mimeType=f.type}
+  const next=[...data];if(editing===null)next.push(x);else next[editing]=x;
+  await saveType('certificates',next);data=next;$('edit').classList.remove('open');renderCertificates();alert('保存・公開しました');
+ }catch(e){alert('保存に失敗しました：'+e.message)}
+}
+async function deleteCertificate(i){
+ if(!confirm('この認定書・許可書を削除しますか？'))return;
+ const next=data.filter((_,j)=>i!==j);
+ try{await saveType('certificates',next);data=next;renderCertificates();alert('削除しました')}catch(e){alert('削除できませんでした：'+e.message)}
+}
+
+function renderRecruit(){const x=data;$('content').innerHTML=`<div class="field"><label>見出し</label><input id="rtitle"></div><div class="field"><label>リード文（Enterで改行・空行で段落）</label><textarea id="rlead"></textarea></div><div class="field"><label>募集職種（改行可）</label><textarea id="rjobs"></textarea></div><div class="field"><label>仕事内容（改行可）</label><textarea id="rdescription"></textarea></div><div class="field"><label>勤務地</label><input id="rlocation"></div><div class="field"><label>応募方法（改行可）</label><textarea id="rapply"></textarea></div><button id="saveRecruit" class="btn primary">保存・公開</button>`;['title','lead','jobs','description','location','apply'].forEach(k=>$('r'+k).value=x[k]||'');$('saveRecruit').onclick=async()=>{['title','lead','jobs','description','location','apply'].forEach(k=>x[k]=$('r'+k).value.trim());await saveType('recruit',x);alert('採用情報を公開しました')}}
+function renderContact(){const x=data;$('content').innerHTML=`<div class="two"><div class="field"><label>ページ見出し</label><input id="ctitle"></div><div class="field"><label>メールアドレス</label><input id="cemail"></div><div class="field full"><label>紹介文</label><textarea id="cintro"></textarea></div><div class="field"><label>電話番号1</label><input id="cphone1"></div><div class="field"><label>電話番号2</label><input id="cphone2"></div></div><button id="saveContact" class="btn primary">保存・公開</button><p class="note">お問い合わせ通知先：n-nakayama@sankyo-setsubi.jp（Cloudflare側でメール送信設定を有効化した場合）</p>`;['title','email','intro','phone1','phone2'].forEach(k=>$('c'+k).value=x[k]||'');$('saveContact').onclick=async()=>{['title','email','intro','phone1','phone2'].forEach(k=>x[k]=$('c'+k).value.trim());await saveType('contact',x);alert('お問い合わせ情報を公開しました')}}
+
+function logoutAdmin(){
+  password='';
+  sessionStorage.removeItem('dotokucho_admin_logged_in');
+  $('app').classList.add('hidden');
+  $('login').classList.remove('hidden');
+  $('pw').value='';
+  $('loginMsg').textContent='ログアウトしました。';
+  history.replaceState(null,'',location.pathname);
+}
+const logoutBtn=document.getElementById('logoutBtn');
+if(logoutBtn) logoutBtn.onclick=logoutAdmin;
+
+// Requiring a fresh password after reload/back is safer than silently restoring the editor.
+window.addEventListener('pageshow',()=>{
+  if(sessionStorage.getItem('dotokucho_admin_logged_in')!=='1'){
+    $('app').classList.add('hidden');
+    $('login').classList.remove('hidden');
+  }
+});
+
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=async()=>{tab=b.dataset.tab;await load()});$('loginBtn').onclick=login;$('pw').addEventListener('keydown',e=>{if(e.key==='Enter')login()});$('addBtn').addEventListener('click',()=>{try{if(tab==='certificates')editCertificate(null);else editItem(null)}catch(e){console.error('記事追加画面:',e);alert('記事追加画面を開けませんでした: '+e.message)}});$('saveItemBtn').onclick=()=>tab==='certificates'?saveCertificate():saveItem();$('cancelBtn').onclick=()=>$('edit').classList.remove('open');$('edit').onclick=e=>{if(e.target===$('edit'))$('edit').classList.remove('open')};
+</script></body></html>

@@ -1,0 +1,34 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>会社概要・各種許可書・認定書一覧 | 株式会社道東空調</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f6f9fc;color:#1a3248;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}header{background:#fff;border-bottom:1px solid #d9e4ed;position:sticky;top:0;z-index:2}.head{max-width:1120px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px}.logo{max-width:240px;width:50%;height:auto}nav{display:flex;flex-wrap:wrap;gap:15px}a{color:#09548c;text-decoration:none}nav a{font-size:13px}main{max-width:1080px;margin:0 auto;padding:56px 22px 85px}.eyebrow{color:#2681b5;letter-spacing:.2em;font-size:12px;font-weight:bold}h1{font-size:clamp(24px,4vw,38px);margin:12px 0 14px;color:#0a315a}.intro{line-height:1.9;color:#536d80}.profile{margin:28px 0 52px;background:#fff;border:1px solid #dbe7f0;border-radius:10px;padding:clamp(18px,4vw,36px)}.profile h1{margin:0 0 22px}.profile dl{margin:0}.profile-row{display:grid;grid-template-columns:145px 1fr;border-top:1px solid #dbe7f0;padding:16px 0;gap:16px;line-height:1.8}.profile-row dt{font-weight:700;color:#0a315a}.profile-row dd{margin:0;overflow-wrap:anywhere}.cert-heading{margin-top:10px}.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:22px;margin-top:36px}.item{background:white;border:1px solid #dbe7f0;border-radius:10px;overflow:hidden;box-shadow:0 4px 18px #0c41600b}.media{padding:16px;background:#edf4f9;display:flex;align-items:center;justify-content:center;min-height:160px}.media img{max-width:100%;max-height:380px;object-fit:contain}.pdf{padding:35px;text-align:center}.info{padding:22px}.info h2{font-size:20px;margin:0 0 14px}.info p{line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.empty{padding:30px;background:#fff;border:1px solid #dbe7f0;border-radius:8px;margin-top:28px}footer{background:#082d52;color:white;text-align:center;padding:30px 12px;font-size:12px}@media(max-width:650px){.profile-row{grid-template-columns:1fr;gap:3px}.head{display:block}.logo{width:230px;max-width:100%}nav{margin-top:15px}main{padding-top:35px}}</style></head><body><header><div class="head"><a href="index.html"><img class="logo" src="assets/dotokucho_header_exact.png" alt="株式会社道東空調"></a><nav><a href="index.html">トップ</a><a href="index.html#business">事業内容</a><a href="works.html">実績紹介</a><a href="recruit.html">採用情報</a><a href="news.html">お知らせ</a></nav></div></header><main><section class="profile" aria-labelledby="company-profile-title"><div class="eyebrow">COMPANY PROFILE</div><h1 id="company-profile-title">会社概要</h1><dl id="profileRows"><div class="profile-row"><dt>会社名</dt><dd>株式会社道東空調</dd></div><div class="profile-row"><dt>住所</dt><dd>〒082-0004<br>北海道河西郡芽室町東芽室北１線１６－１９</dd></div><div class="profile-row"><dt>電話</dt><dd>0155-62-6600</dd></div><div class="profile-row"><dt>FAX</dt><dd>0155-62-6622</dd></div></dl></section><div class="eyebrow cert-heading">LICENSE & CERTIFICATION</div><h1>各種許可書・認定書一覧</h1><p class="intro">株式会社道東空調の各種許可書・認定書をご紹介します。</p><div id="items" class="items"><p>読み込み中...</p></div><p><a href="index.html">← トップページへ戻る</a></p></main><footer>© 2026 DOTOKUCHO CO., LTD.</footer><script>
+(async()=>{
+const profileRoot=document.getElementById('profileRows');
+try{
+ const response=await fetch('/api/cms?type=profile',{cache:'no-store'});
+ if(response.ok){const profile=await response.json();if(Array.isArray(profile.rows)){
+  profileRoot.replaceChildren();
+  for(const row of profile.rows){const wrap=document.createElement('div');wrap.className='profile-row';const dt=document.createElement('dt');dt.textContent=row.label||'';const dd=document.createElement('dd');dd.style.whiteSpace='pre-wrap';dd.textContent=row.value||'';wrap.append(dt,dd);profileRoot.append(wrap)}
+ }}
+}catch(e){console.warn('会社概要は初期表示を使用します',e)}
+const root=document.getElementById('items');
+try{
+ const response=await fetch('/api/cms?type=certificates',{cache:'no-store'});if(!response.ok)throw Error('load');
+ const records=await response.json();if(!Array.isArray(records))throw Error('format');
+ root.replaceChildren();
+ if(!records.length){const p=document.createElement('p');p.className='empty';p.textContent='現在、掲載準備中です。';root.append(p);return}
+ for(const x of records){
+  const card=document.createElement('article');card.className='item';
+  if(x.imageKey){
+   const media=document.createElement('div');media.className='media';
+   const url='/api/cms?asset='+encodeURIComponent(x.imageKey);
+   if(x.mimeType==='application/pdf'){
+    const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.className='pdf';link.textContent='📄 PDFを開く';media.append(link)
+   }else{
+    const link=document.createElement('a');link.href=url;link.target='_blank';link.rel='noopener noreferrer';
+    const img=document.createElement('img');img.src=url;img.alt=x.title||'認定書';img.loading='lazy';link.append(img);media.append(link)
+   }card.append(media)
+  }
+  const info=document.createElement('div');info.className='info';const title=document.createElement('h2');title.textContent=x.title||'';const desc=document.createElement('p');desc.textContent=x.description||'';info.append(title,desc);card.append(info);root.append(card)
+ }
+}catch(e){root.innerHTML='<p class="empty">一覧を読み込めませんでした。時間をおいて再度お試しください。</p>'}
+})();
+</script></body></html>
